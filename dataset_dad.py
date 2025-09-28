@@ -18,7 +18,7 @@ import spacy
 
 
 class Dataset(Dataset):
-    def __init__(self, dataset_path, img_dataset_path, split_path, ref_interval, objmap_file, training):
+    def __init__(self, dataset_path, img_dataset_path, split_path, ref_interval, objmap_file, training, attention_path):
 
         """
 		Input:
@@ -513,6 +513,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
