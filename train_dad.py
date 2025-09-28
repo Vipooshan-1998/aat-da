@@ -223,7 +223,7 @@ def main():
 			obj_boxes = obj_boxes.unsqueeze(0)      # (1, T, N, 4)
 			all_att_feat = all_att_feat.unsqueeze(0)
 			print(img_feat.shape)
-			print(obj_feats.shape)
+			print(obj_feat.shape)
 			print(obj_boxes.shape)
 			print(all_att_feat.shape)
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
@@ -282,6 +282,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
