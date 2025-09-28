@@ -218,6 +218,10 @@ def main():
 			temporal_adj_list, temporal_edge_w, edge_embeddings, batch_vec = temporal_adj_list.to(device), temporal_edge_w.to(device), edge_embeddings.to(device), batch_vec.to(device)
 			
 			# Get predictions from the model
+			img_feat = img_feat.unsqueeze(0)        # (1, T, D)
+			obj_feats = obj_vis_feat.unsqueeze(0)   # (1, T, N, D)
+			obj_boxes = obj_boxes.unsqueeze(0)      # (1, T, N, 4)
+			all_att_feat = all_att_feat.unsqueeze(0)
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
 			logits, probs, Ht = model(img_feat, obj_vis_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
@@ -274,6 +278,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
