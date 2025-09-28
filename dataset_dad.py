@@ -17,6 +17,8 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 import spacy
 
 import torchvision.io as io
+import cv2
+import numpy as np
 
 class Dataset(Dataset):
     def __init__(self, dataset_path, img_dataset_path, split_path, ref_interval, objmap_file, training, attention_path):
@@ -109,6 +111,39 @@ class Dataset(Dataset):
             toa = min(max(1, toa), self.n_frames - 1)
             toa_dict[anno['vid']] = toa
         return toa_dict
+
+        def read_attention_video_grayscale(att_file):
+		    """
+		    Read a grayscale attention video and return frames as a NumPy array of shape (T, H, W)
+		    
+		    Args:
+		        att_file (str): Path to the attention video (.mp4)
+		        
+		    Returns:
+		        np.ndarray: Video frames, shape (T, H, W)
+		    """
+            cap = cv2.VideoCapture(att_file)
+            frames = []
+		
+            while True:
+                ret, frame = cap.read()
+                if not ret:
+                    break
+		        
+                # Convert to grayscale if frame has 3 channels
+                if len(frame.shape) == 3:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		
+                frames.append(frame)
+		
+            cap.release()
+		    
+            frames = np.stack(frames)  # shape: (T, H, W)
+            return frames
+		
+		# Usage
+		all_att_feat = read_attention_video_grayscale(att_file)
+		print(all_att_feat.shape)  # (T, H, W)
     
     def _get_distances(self, a, b, p):
         return torch.abs(((b[1] - a[1])*p[0] - (b[0] - a[0])*p[1] + b[0]*a[1] - b[1]*a[0]) / torch.sqrt(torch.pow(b[1] - a[1], 2) + torch.pow(b[0] - a[0], 2)))
@@ -173,18 +208,19 @@ class Dataset(Dataset):
                                     feature_path.split('/')[-1].split(".")[0][5:] + '.mp4')
         # all_att_feat = self.transform(np.load(att_file)).squeeze(0)
 
-        # # Read video frames (T x H x W x C)
-        # video_frames, _, _ = io.read_video(att_file, pts_unit='sec')
+        # # # Read video frames (T x H x W x C)
+        # # video_frames, _, _ = io.read_video(att_file, pts_unit='sec')
 
-        # # Convert each frame -> PIL and apply transform
-        # all_att_feat = torch.stack([self.transform(transforms.ToPILImage()(frame)) for frame in video_frames])
+        # # # Convert each frame -> PIL and apply transform
+        # # all_att_feat = torch.stack([self.transform(transforms.ToPILImage()(frame)) for frame in video_frames])
 
-        # Ensure frames have a channel dimension
-        if video_frames.ndim == 3:  # (T, H, W)
-                video_frames = video_frames.unsqueeze(-1)  # (T, H, W, 1)
+        # # Ensure frames have a channel dimension
+        # if video_frames.ndim == 3:  # (T, H, W)
+        #         video_frames = video_frames.unsqueeze(-1)  # (T, H, W, 1)
 
-        # Convert each frame to PIL (grayscale mode)
-        all_att_feat = torch.stack([self.transform(transforms.ToPILImage()(frame)) for frame in video_frames])
+		# Usage
+        all_att_feat = read_attention_video_grayscale(att_file)
+        print(all_att_feat.shape)  # (T, H, W)
 
         # Calculating the bbox centers
         cx, cy = (all_bbox[:, :, 0] + all_bbox[:, :, 2]) / 2, (all_bbox[:, :, 1] + all_bbox[:, :, 3]) / 2
@@ -528,6 +564,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
