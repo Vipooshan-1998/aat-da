@@ -255,13 +255,13 @@ class AAT_DA_FullSeq(nn.Module):
         # device = img_feat.device
         device = next(self.parameters()).device   # <- model’s actual device
 
-        img_feat = img_feat.to(device)
-        obj_feats = obj_feats.to(device)
-        obj_boxes = obj_boxes.to(device)
+        img_feat = img_feat.to(device).float()
+        obj_feats = obj_feats.to(device).float()
+        obj_boxes = obj_boxes.to(device).float()
         if driver_attn_map is not None:
-            driver_attn_map = driver_attn_map.to(device)
+            driver_attn_map = driver_attn_map.to(device).float()
         if driver_attn_per_obj is not None:
-            driver_attn_per_obj = driver_attn_per_obj.to(device)
+            driver_attn_per_obj = driver_attn_per_obj.to(device).float()
 
         B, T, D = img_feat.shape
         _, T2, N, D2 = obj_feats.shape
