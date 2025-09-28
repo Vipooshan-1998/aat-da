@@ -112,7 +112,7 @@ class Dataset(Dataset):
             toa_dict[anno['vid']] = toa
         return toa_dict
 
-    def read_attention_video_grayscale(att_file):
+    def read_attention_video_grayscale(self, att_file):
             """
             Read a grayscale attention video and return frames as a NumPy array of shape (T, H, W)
             
@@ -561,6 +561,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
