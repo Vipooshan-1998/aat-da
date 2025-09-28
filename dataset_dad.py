@@ -167,10 +167,10 @@ class Dataset(Dataset):
         # Attention
         if curr_vid_label > 0:
             att_file = os.path.join(self.attention_path, feature_path.split('/')[-2], "positive",
-                                    feature_path.split('/')[-1].split(".")[5:11] + '.mp4')
+                                    feature_path.split('/')[-1].split(".")[0] + '.mp4')
         else:
             att_file = os.path.join(self.attention_path, feature_path.split('/')[-2], "negative",
-                                    feature_path.split('/')[-1].split(".")[5:11] + '.mp4')
+                                    feature_path.split('/')[-1].split(".")[0] + '.mp4')
         # all_att_feat = self.transform(np.load(att_file)).squeeze(0)
 
         # Read video frames (T x H x W x C)
@@ -521,6 +521,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
