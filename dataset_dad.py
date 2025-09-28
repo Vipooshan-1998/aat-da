@@ -112,16 +112,16 @@ class Dataset(Dataset):
             toa_dict[anno['vid']] = toa
         return toa_dict
 
-        def read_attention_video_grayscale(att_file):
-		    """
-		    Read a grayscale attention video and return frames as a NumPy array of shape (T, H, W)
-		    
-		    Args:
-		        att_file (str): Path to the attention video (.mp4)
+    def read_attention_video_grayscale(att_file):
+            """
+            Read a grayscale attention video and return frames as a NumPy array of shape (T, H, W)
+            
+            Args:
+                att_file (str): Path to the attention video (.mp4)
 		        
-		    Returns:
-		        np.ndarray: Video frames, shape (T, H, W)
-		    """
+            Returns:
+                np.ndarray: Video frames, shape (T, H, W)
+            """
             cap = cv2.VideoCapture(att_file)
             frames = []
 		
@@ -564,6 +564,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
