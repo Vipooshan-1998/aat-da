@@ -222,6 +222,10 @@ def main():
 			obj_feats    = obj_vis_feat.unsqueeze(0).unsqueeze(2)  # (1, T, 1, D) if only one object
 			obj_boxes = obj_boxes.unsqueeze(0)      # (1, T, N, 4)
 			all_att_feat = all_att_feat.unsqueeze(0)
+			print(img_feat.shape)
+			print(obj_feats.shape)
+			print(obj_boxes.shape)
+			print(all_att_feat.shape)
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
 			logits, probs, Ht = model(img_feat, obj_vis_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
@@ -278,6 +282,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
