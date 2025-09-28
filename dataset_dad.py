@@ -140,10 +140,7 @@ class Dataset(Dataset):
 		    
             frames = np.stack(frames)  # shape: (T, H, W)
             return frames
-		
-		# Usage
-		all_att_feat = read_attention_video_grayscale(att_file)
-		print(all_att_feat.shape)  # (T, H, W)
+
     
     def _get_distances(self, a, b, p):
         return torch.abs(((b[1] - a[1])*p[0] - (b[0] - a[0])*p[1] + b[0]*a[1] - b[1]*a[0]) / torch.sqrt(torch.pow(b[1] - a[1], 2) + torch.pow(b[0] - a[0], 2)))
@@ -564,6 +561,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
