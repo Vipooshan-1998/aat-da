@@ -249,8 +249,14 @@ def main():
 				optimizer.step()
 				loss = 0
 			
-			pred_labels = probs.argmax(1)
-			total_pred = (pred_labels == y).cpu().numpy().sum()
+			# pred_labels = probs.argmax(1)
+			# total_pred = (pred_labels == y).cpu().numpy().sum()
+
+			# logits: (B, T, 2)
+			pred_labels = probs.argmax(-1)       # (B, T)
+			pred_labels = pred_labels.view(-1)   # (B*T,) -> matches y_flat
+			y_flat = y.view(-1)                  # ensure same shape
+			total_pred = (pred_labels == y_flat).cpu().numpy().sum()
 	        
 			# Keep track of epoch metrics
 			epoch_metrics["c1_loss"].append(c_loss1.item())
@@ -292,6 +298,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
