@@ -252,7 +252,17 @@ class AAT_DA_FullSeq(nn.Module):
           logits: (B, T, 2)
           probs:  (B, T, 2)
         """
-        device = img_feat.device
+        # device = img_feat.device
+        device = next(self.parameters()).device   # <- model’s actual device
+
+        img_feat = img_feat.to(device)
+        obj_feats = obj_feats.to(device)
+        obj_boxes = obj_boxes.to(device)
+        if driver_attn_map is not None:
+            driver_attn_map = driver_attn_map.to(device)
+        if driver_attn_per_obj is not None:
+            driver_attn_per_obj = driver_attn_per_obj.to(device)
+
         B, T, D = img_feat.shape
         _, T2, N, D2 = obj_feats.shape
         assert T == T2 and D == D2, "time/feature mismatch"
