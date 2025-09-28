@@ -218,7 +218,7 @@ def main():
 			temporal_adj_list, temporal_edge_w, edge_embeddings, batch_vec = temporal_adj_list.to(device), temporal_edge_w.to(device), edge_embeddings.to(device), batch_vec.to(device)
 			
 			# Get predictions from the model
-			# img_feat = img_feat.unsqueeze(0)        # (1, T, D)
+			img_feat = img_feat.unsqueeze(0)        # (1, T, D)
 			# obj_feat = obj_feat.unsqueeze(0).unsqueeze(2)  # (1, T, 1, D) if only one object
 			# obj_boxes = obj_boxes.unsqueeze(0)      # (1, T, N, 4)
 			# all_att_feat = all_att_feat.unsqueeze(0)
@@ -282,6 +282,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
