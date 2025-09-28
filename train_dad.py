@@ -222,6 +222,7 @@ def main():
 			# obj_feat = obj_feat.unsqueeze(0).unsqueeze(2)  # (1, T, 1, D) if only one object
 			# obj_boxes = obj_boxes.unsqueeze(0)      # (1, T, N, 4)
 			# all_att_feat = all_att_feat.unsqueeze(0)
+			obj_boxes = obj_boxes[:, :, :, :4]
 			print(img_feat.shape)
 			print(obj_feat.shape)
 			print(obj_boxes.shape)
@@ -282,6 +283,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
