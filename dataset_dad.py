@@ -178,7 +178,7 @@ class Dataset(Dataset):
         # all_img_feat = self.transform(np.load(img_file)).squeeze(0)
 
         # VGG16 Image/Global Feature is stored in 0th Index
-        all_img_feat = torch.from_numpy(all_data['data'])[:, 1:, :]
+        all_img_feat = torch.from_numpy(all_data['data'])[:, 0, :]
 
         # Reading frame stats file
         if curr_vid_label > 0:
@@ -561,6 +561,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
