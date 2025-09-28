@@ -227,6 +227,7 @@ def main():
 			print(obj_feat.shape)
 			print(obj_boxes.shape)
 			print(all_att_feat.shape)
+			all_att_feat = all_att_feat.float()
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
 			logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
@@ -283,6 +284,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
