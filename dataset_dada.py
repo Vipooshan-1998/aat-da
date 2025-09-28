@@ -122,14 +122,17 @@ class Dataset(Dataset):
         else:
             curr_toa = self.n_frames + 1
 
-        # Reading frame (i3d) features for the frames
-        if curr_vid_label > 0:
-            img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "positive",
-                                    feature_path.split('/')[-1].split(".")[0] + '.npy')
-        else:
-            img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "negative",
-                                    feature_path.split('/')[-1].split(".")[0] + '.npy')
-        all_img_feat = self.transform(np.load(img_file)).squeeze(0)
+        # # Reading frame (i3d) features for the frames
+        # if curr_vid_label > 0:
+        #     img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "positive",
+        #                             feature_path.split('/')[-1].split(".")[0] + '.npy')
+        # else:
+        #     img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "negative",
+        #                             feature_path.split('/')[-1].split(".")[0] + '.npy')
+        # all_img_feat = self.transform(np.load(img_file)).squeeze(0)
+
+        # VGG16 Image/Global Feature is stored in 0th Index
+        all_img_feat = torch.from_numpy(all_data['data'])[:, 1:, :]
 
         # Reading frame stats file
         if curr_vid_label > 0:
