@@ -176,8 +176,8 @@ class Dataset(Dataset):
         # Read video frames (T x H x W x C)
         video_frames, _, _ = io.read_video(att_file, pts_unit='sec')
 
-        # Apply your transform (make sure it handles video tensors)
-        all_att_feat = self.transform(video_frames).squeeze(0)
+        # Convert each frame -> PIL and apply transform
+        all_att_feat = torch.stack([self.transform(transforms.ToPILImage()(frame)) for frame in video_frames])
 
         # Calculating the bbox centers
         cx, cy = (all_bbox[:, :, 0] + all_bbox[:, :, 2]) / 2, (all_bbox[:, :, 1] + all_bbox[:, :, 3]) / 2
@@ -521,6 +521,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
