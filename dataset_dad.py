@@ -181,7 +181,7 @@ class Dataset(Dataset):
 
         # Ensure frames have a channel dimension
         if video_frames.ndim == 3:  # (T, H, W)
-			video_frames = video_frames.unsqueeze(-1)  # (T, H, W, 1)
+                video_frames = video_frames.unsqueeze(-1)  # (T, H, W, 1)
 
         # Convert each frame to PIL (grayscale mode)
         all_att_feat = torch.stack([self.transform(transforms.ToPILImage()(frame)) for frame in video_frames])
@@ -528,6 +528,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
