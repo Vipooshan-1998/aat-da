@@ -219,7 +219,7 @@ def main():
 			
 			# Get predictions from the model
 			img_feat = img_feat.unsqueeze(0)        # (1, T, D)
-			obj_feats = obj_vis_feat.unsqueeze(0)   # (1, T, N, D)
+			obj_feats    = obj_vis_feat.unsqueeze(0).unsqueeze(2)  # (1, T, 1, D) if only one object
 			obj_boxes = obj_boxes.unsqueeze(0)      # (1, T, N, 4)
 			all_att_feat = all_att_feat.unsqueeze(0)
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
@@ -278,6 +278,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
