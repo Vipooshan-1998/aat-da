@@ -219,7 +219,7 @@ def main():
 			
 			# Get predictions from the model
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
-			logits, probs, Ht = model(img_feat, obj_feats, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
+			logits, probs, Ht = model(img_feat, obj_vis_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
 			# Exclude the actual accident frames from the training
 			c_loss1 = cls_criterion(logits[:toa], y[:toa])    
@@ -274,5 +274,6 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
