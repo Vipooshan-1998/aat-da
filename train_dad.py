@@ -231,8 +231,16 @@ def main():
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
 			logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
-			# Exclude the actual accident frames from the training
-			c_loss1 = cls_criterion(logits[:toa], y[:toa])    
+			# Flatten logits and target for CrossEntropyLoss
+			B, T, C = logits.shape
+			logits_flat = logits.view(B*T, C)        # (B*T, 2)
+			y_flat = y.view(B*T)                     # (B*T,)
+
+			# Compute loss
+			c_loss1 = cls_criterion(logits_flat[:toa], y_flat[:toa])
+
+			# # Exclude the actual accident frames from the training
+			# c_loss1 = cls_criterion(logits[:toa], y[:toa])    
 			loss = loss + c_loss1  
 
 			if (batch_i+1)%3 == 0:
@@ -284,6 +292,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
