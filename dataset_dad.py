@@ -164,6 +164,8 @@ class Dataset(Dataset):
         #                                     feature_path.split('/')[-1].split(".")[0][:] + '.npy')
         frame_stats = torch.from_numpy(np.load(frame_stats_file)).float()
 
+        print(feature_path.split('/')[-1].split(".")[0].split("_")[5:11])
+        print("---------------------")
         # Attention
         if curr_vid_label > 0:
             att_file = os.path.join(self.attention_path, feature_path.split('/')[-2], "positive",
@@ -521,6 +523,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
