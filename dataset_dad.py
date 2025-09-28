@@ -127,13 +127,13 @@ class Dataset(Dataset):
         else:
             curr_toa = self.n_frames + 1
 
-        # Reading frame (i3d) features for the frames
-        if curr_vid_label > 0:
-            img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "positive",
-                                    feature_path.split('/')[-1].split(".")[0][5:] + '.npy')
-        else:
-            img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "negative",
-                                    feature_path.split('/')[-1].split(".")[0][5:] + '-neg.npy')		     # '-neg.npy'
+        # # Reading frame (i3d) features for the frames
+        # if curr_vid_label > 0:
+        #     img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "positive",
+        #                             feature_path.split('/')[-1].split(".")[0][5:] + '.npy')
+        # else:
+        #     img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "negative",
+        #                             feature_path.split('/')[-1].split(".")[0][5:] + '-neg.npy')		     # '-neg.npy'
         # Edit
         # if curr_vid_label > 0:
         #     img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "positive",
@@ -141,7 +141,10 @@ class Dataset(Dataset):
         # else:
         #     img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "negative",
         #                             feature_path.split('/')[-1].split(".")[0][:] + '.npy')
-        all_img_feat = self.transform(np.load(img_file)).squeeze(0)
+        # all_img_feat = self.transform(np.load(img_file)).squeeze(0)
+
+        # VGG16 Image/Global Feature is stored in 0th Index
+        all_img_feat = torch.from_numpy(all_data['data'])[:, 1:, :]
 
         # Reading frame stats file
         if curr_vid_label > 0:
@@ -158,6 +161,15 @@ class Dataset(Dataset):
         #     frame_stats_file = os.path.join(self.frame_stats_path, feature_path.split('/')[-2], "negative",
         #                                     feature_path.split('/')[-1].split(".")[0][:] + '.npy')
         frame_stats = torch.from_numpy(np.load(frame_stats_file)).float()
+
+        # Attention
+        if curr_vid_label > 0:
+            att_file = os.path.join(self.attention_path, feature_path.split('/')[-2], "positive",
+                                    feature_path.split('/')[-1].split(".")[0] + '.npy')
+        else:
+            att_file = os.path.join(self.attention_path, feature_path.split('/')[-2], "negative",
+                                    feature_path.split('/')[-1].split(".")[0] + '.npy')
+        all_att_feat = self.transform(np.load(att_file)).squeeze(0)
 
         # Calculating the bbox centers
         cx, cy = (all_bbox[:, :, 0] + all_bbox[:, :, 2]) / 2, (all_bbox[:, :, 1] + all_bbox[:, :, 3]) / 2
@@ -266,7 +278,7 @@ class Dataset(Dataset):
                 video_adj_list += [[i - j, i]]  # adding previous ref_interval neighbors
         video_adj_list = torch.Tensor(video_adj_list).permute((1, 0)).long()
 
-        return data.x, data.edge_index, data.y, all_img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, num_objs_list, curr_toa
+        return data.x, data.edge_index, data.y, all_img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, num_objs_list, curr_toa, all_att_feat, all_bbox
 
     def __len__(self):
         return len(self.feature_paths)
@@ -501,6 +513,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
