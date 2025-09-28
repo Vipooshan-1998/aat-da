@@ -66,7 +66,7 @@ def test_model(epoch, model, test_dataloader):
 	model.eval()
 	total_correct, total, all_toa = 0, 0, []
  
-	for batch_i, (X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, toa) in enumerate(test_dataloader):
+	for batch_i, (X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, toa, all_att_feat, all_bbox) in enumerate(test_dataloader):
         
 		X = X.reshape(-1, X.shape[2])
 		img_feat = img_feat.reshape(-1, img_feat.shape[2])
@@ -162,7 +162,8 @@ def main():
 	test_dataloader = DataLoader(test_dataset, batch_size=opt.test_video_batch_size, shuffle=False, num_workers=8)
 
 	# Define network
-	model = SpaceTempGoG_detr_dad(input_dim=opt.input_dim, embedding_dim=opt.embedding_dim, img_feat_dim=opt.img_feat_dim, num_classes=opt.num_classes).to(device)
+	# model = SpaceTempGoG_detr_dad(input_dim=opt.input_dim, embedding_dim=opt.embedding_dim, img_feat_dim=opt.img_feat_dim, num_classes=opt.num_classes).to(device)
+	model = AAT_DA_FullSeq(in_dim=opt.input_dim, d_model=opt.embedding_dim, num_heads=8, max_objects=19, spatial_layers=4, temporal_layers=2, dropout_spatial=0.3, dropout_temporal=0.1, fc_dropout=0.5).to(device)
 	print(model)
 	
 	model.train()
@@ -192,7 +193,7 @@ def main():
 
 		loss, all_toa = 0, []
 
-		for batch_i, (X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, toa) in enumerate(train_dataloader):           
+		for batch_i, (X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, toa, all_att_feat, obj_boxes) in enumerate(train_dataloader):           
             
             #Processing the inputs from the dataloader
 			X = X.reshape(-1, X.shape[2])
@@ -214,8 +215,9 @@ def main():
 			temporal_adj_list, temporal_edge_w, edge_embeddings, batch_vec = temporal_adj_list.to(device), temporal_edge_w.to(device), edge_embeddings.to(device), batch_vec.to(device)
 			
 			# Get predictions from the model
-			logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
- 
+			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
+			logits, probs, Ht = model(img_feat, obj_feats, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
+
 			# Exclude the actual accident frames from the training
 			c_loss1 = cls_criterion(logits[:toa], y[:toa])    
 			loss = loss + c_loss1  
@@ -269,3 +271,4 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
