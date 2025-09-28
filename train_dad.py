@@ -196,7 +196,7 @@ def main():
 
 		loss, all_toa = 0, []
 
-		for batch_i, (X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, toa, all_att_feat, obj_boxes) in enumerate(train_dataloader):           
+		for batch_i, (X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, toa, all_att_feat, obj_boxes, obj_feat) in enumerate(train_dataloader):           
             
             #Processing the inputs from the dataloader
 			X = X.reshape(-1, X.shape[2])
@@ -219,7 +219,7 @@ def main():
 			
 			# Get predictions from the model
 			img_feat = img_feat.unsqueeze(0)        # (1, T, D)
-			obj_feats    = obj_vis_feat.unsqueeze(0).unsqueeze(2)  # (1, T, 1, D) if only one object
+			obj_feat = obj_feat.unsqueeze(0).unsqueeze(2)  # (1, T, 1, D) if only one object
 			obj_boxes = obj_boxes.unsqueeze(0)      # (1, T, N, 4)
 			all_att_feat = all_att_feat.unsqueeze(0)
 			print(img_feat.shape)
@@ -227,7 +227,7 @@ def main():
 			print(obj_boxes.shape)
 			print(all_att_feat.shape)
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
-			logits, probs, Ht = model(img_feat, obj_vis_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
+			logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
 			# Exclude the actual accident frames from the training
 			c_loss1 = cls_criterion(logits[:toa], y[:toa])    
@@ -282,6 +282,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
