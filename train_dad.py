@@ -124,16 +124,28 @@ def test_model(epoch, model, test_dataloader):
 		# select class 1 probability for all frames and flatten
 		probs_class1 = probs[:, :, 1].reshape(-1).cpu()  # shape: (B*T,)
 
-		if batch_i == 0:
-			all_probs_vid2 = probs_class1.unsqueeze(0)   # (1, B*T)
-			all_pred = pred_labels.cpu()                 # (B*T,)
-			all_y = y_flat.cpu()                          # (B*T,)
-			all_y_vid = y_flat.max().unsqueeze(0).cpu()  # single value per video
-		else:
-			all_probs_vid2 = torch.cat((all_probs_vid2, probs_class1.unsqueeze(0)), dim=0)
-			all_pred = torch.cat((all_pred, pred_labels.cpu()), dim=0)
-			all_y = torch.cat((all_y, y_flat.cpu()), dim=0)
-			all_y_vid = torch.cat((all_y_vid, y_flat.max().unsqueeze(0).cpu()), dim=0)
+		# if batch_i == 0:
+		# 	all_probs_vid2 = probs_class1.unsqueeze(0)   # (1, B*T)
+		# 	all_pred = pred_labels.cpu()                 # (B*T,)
+		# 	all_y = y_flat.cpu()                          # (B*T,)
+		# 	all_y_vid = y_flat.max().unsqueeze(0).cpu()  # single value per video
+		# else:
+		# 	all_probs_vid2 = torch.cat((all_probs_vid2, probs_class1.unsqueeze(0)), dim=0)
+		# 	all_pred = torch.cat((all_pred, pred_labels.cpu()), dim=0)
+		# 	all_y = torch.cat((all_y, y_flat.cpu()), dim=0)
+		# 	all_y_vid = torch.cat((all_y_vid, y_flat.max().unsqueeze(0).cpu()), dim=0)
+
+		if batch_i == 0: 
+			# store per-frame accident probability (class 1 only)
+			all_probs_vid2 = probs[:, 1].detach().cpu().numpy()[None, :]   # (1, T)
+			all_pred = probs.argmax(-1).detach().cpu().numpy().reshape(1, -1)  # (1, T)
+			all_y = y.detach().cpu().numpy().reshape(1,)                    # (1,)
+			all_y_vid = np.array([torch.max(y).item()])                     # (1,)
+		else: 
+			all_probs_vid2 = np.vstack((all_probs_vid2, probs[:, 1].detach().cpu().numpy()[None, :]))
+			all_pred = np.vstack((all_pred, probs.argmax(-1).detach().cpu().numpy().reshape(1, -1)))
+			all_y = np.concatenate((all_y, y.detach().cpu().numpy().reshape(1,)))
+			all_y_vid = np.concatenate((all_y_vid, [torch.max(y).item()]))
 
 		# Empty cache
 		if torch.cuda.is_available():
@@ -291,13 +303,21 @@ def main():
 			# Keep track of epoch metrics
 			epoch_metrics["c1_loss"].append(c_loss1.item())
 	
-			if batch_i == 0: 
-				all_probs_vid2 = probs[:, 1].detach().cpu().unsqueeze(0)
-				all_y_vid =  torch.max(y).unsqueeze(0).cpu() #y.cpu() #.unsqueeze(0)
-			else: 
-				all_probs_vid2 = torch.cat((all_probs_vid2, probs[:, 1].detach().cpu().unsqueeze(0)))
-				all_y_vid = torch.cat((all_y_vid, torch.max(y).unsqueeze(0).cpu()))
-			all_toa += [toa]           
+			# if batch_i == 0: 
+			# 	all_probs_vid2 = probs[:, 1].detach().cpu().unsqueeze(0)
+			# 	all_y_vid =  torch.max(y).unsqueeze(0).cpu() #y.cpu() #.unsqueeze(0)
+			# else: 
+			# 	all_probs_vid2 = torch.cat((all_probs_vid2, probs[:, 1].detach().cpu().unsqueeze(0)))
+			# 	all_y_vid = torch.cat((all_y_vid, torch.max(y).unsqueeze(0).cpu()))
+			# all_toa += [toa]      
+
+			if batch_i == 0:
+				all_probs_vid2 = probs[:, 1].detach().cpu().numpy()[None, :]      # shape (1, T)
+				all_y_vid = np.array([torch.max(y).item()])                       # shape (1,)
+			else:
+				all_probs_vid2 = np.vstack((all_probs_vid2, probs[:, 1].detach().cpu().numpy()[None, :]))
+				all_y_vid = np.concatenate((all_y_vid, [torch.max(y).item()]))
+			all_toa += [toa]
             
 			if batch_i % 100 == 0:
 				print ("[Epoch %d/%d] [Batch %d/%d] [CE Loss: %f (%f)] [LR : %.6f]"
@@ -328,6 +348,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
