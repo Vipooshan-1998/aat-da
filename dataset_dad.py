@@ -16,6 +16,7 @@ from torch_geometric.data import InMemoryDataset
 from nltk.tokenize import sent_tokenize, word_tokenize
 import spacy
 
+import torchvision.io as io
 
 class Dataset(Dataset):
     def __init__(self, dataset_path, img_dataset_path, split_path, ref_interval, objmap_file, training, attention_path):
@@ -166,11 +167,17 @@ class Dataset(Dataset):
         # Attention
         if curr_vid_label > 0:
             att_file = os.path.join(self.attention_path, feature_path.split('/')[-2], "positive",
-                                    feature_path.split('/')[-1].split(".")[0] + '.npy')
+                                    feature_path.split('/')[-1].split(".")[5:11] + '.mp4')
         else:
             att_file = os.path.join(self.attention_path, feature_path.split('/')[-2], "negative",
-                                    feature_path.split('/')[-1].split(".")[0] + '.npy')
-        all_att_feat = self.transform(np.load(att_file)).squeeze(0)
+                                    feature_path.split('/')[-1].split(".")[5:11] + '.mp4')
+        # all_att_feat = self.transform(np.load(att_file)).squeeze(0)
+
+        # Read video frames (T x H x W x C)
+        video_frames, _, _ = io.read_video(att_file, pts_unit='sec')
+
+        # Apply your transform (make sure it handles video tensors)
+        all_att_feat = self.transform(video_frames).squeeze(0)
 
         # Calculating the bbox centers
         cx, cy = (all_bbox[:, :, 0] + all_bbox[:, :, 2]) / 2, (all_bbox[:, :, 1] + all_bbox[:, :, 3]) / 2
@@ -514,6 +521,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
