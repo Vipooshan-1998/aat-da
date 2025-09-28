@@ -339,7 +339,8 @@ def main():
 		print(f"Time: {end-start}")
 
 		#Print the avergae precision 
-		_, ttc, _ = evaluation(all_probs_vid2.numpy(), all_y_vid.numpy(), all_toa)
+		# _, ttc, _ = evaluation(all_probs_vid2.numpy(), all_y_vid.numpy(), all_toa)
+		_, ttc, _ = evaluation(all_probs_vid2, all_y_vid, all_toa)
     	
     	#Testing the model
 		test_model(epoch, model, test_dataloader)
@@ -348,6 +349,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
