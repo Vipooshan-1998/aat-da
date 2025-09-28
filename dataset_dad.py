@@ -216,7 +216,7 @@ class Dataset(Dataset):
         #         video_frames = video_frames.unsqueeze(-1)  # (T, H, W, 1)
 
         # Usage
-        all_att_feat = read_attention_video_grayscale(att_file)
+        all_att_feat = self.read_attention_video_grayscale(att_file)
         print(all_att_feat.shape)  # (T, H, W)
 
         # Calculating the bbox centers
@@ -561,6 +561,7 @@ class FeaturesDataset(Dataset):
 
     def __len__(self):
         return len(self.feature_paths)
+
 
 
 
