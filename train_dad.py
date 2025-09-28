@@ -67,7 +67,7 @@ def test_model(epoch, model, test_dataloader):
 	model.eval()
 	total_correct, total, all_toa = 0, 0, []
  
-	for batch_i, (X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, toa, all_att_feat, all_bbox) in enumerate(test_dataloader):
+	for batch_i, (X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, toa, all_att_feat, obj_boxes, obj_feat) in enumerate(test_dataloader):
         
 		X = X.reshape(-1, X.shape[2])
 		img_feat = img_feat.reshape(-1, img_feat.shape[2])
@@ -87,23 +87,49 @@ def test_model(epoch, model, test_dataloader):
 		all_toa += [toa.item()]
         
 		with torch.no_grad():
-			logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
+			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
+			logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
+
+		# logits: (B, T, 2)
+		pred_labels = probs.argmax(-1)       # (B, T)
+		pred_labels = pred_labels.view(-1)   # (B*T,) -> matches y_flat
+		y_flat = y.view(-1)                  # ensure same shape
+		total_pred = (pred_labels == y_flat).cpu().numpy().sum()
+	
+		# pred_labels = probs.argmax(1)
 		
-		pred_labels = probs.argmax(1)
+		# total_correct += (pred_labels == y).cpu().numpy().sum()
+		# total += y.shape[0]
+
+		pred_labels = probs.argmax(-1).view(-1)  # (B*T,)
+		y_flat = y.view(-1)                      # (B*T,)
+		total_correct += (pred_labels == y_flat).cpu().numpy().sum()
+		total += y_flat.shape[0]
 		
-		total_correct += (pred_labels == y).cpu().numpy().sum()
-		total += y.shape[0]
-		
-		if batch_i == 0: 
-			all_probs_vid2 = probs[:, 1].cpu().unsqueeze(0)
-			all_pred = pred_labels.cpu()
-			all_y =  y.cpu() #.unsqueeze(0)
-			all_y_vid =  torch.max(y).unsqueeze(0).cpu() #y.cpu() #.unsqueeze(0)
-		else: 
-			all_probs_vid2 = torch.cat((all_probs_vid2, probs[:, 1].cpu().unsqueeze(0)))
-			all_pred = torch.cat((all_pred, pred_labels.cpu()))
-			all_y = torch.cat((all_y, y.cpu()))
-			all_y_vid = torch.cat((all_y_vid, torch.max(y).unsqueeze(0).cpu()))
+		# if batch_i == 0: 
+		# 	all_probs_vid2 = probs[:, 1].cpu().unsqueeze(0)
+		# 	all_pred = pred_labels.cpu()
+		# 	all_y =  y.cpu() #.unsqueeze(0)
+		# 	all_y_vid =  torch.max(y).unsqueeze(0).cpu() #y.cpu() #.unsqueeze(0)
+		# else: 
+		# 	all_probs_vid2 = torch.cat((all_probs_vid2, probs[:, 1].cpu().unsqueeze(0)))
+		# 	all_pred = torch.cat((all_pred, pred_labels.cpu()))
+		# 	all_y = torch.cat((all_y, y.cpu()))
+		# 	all_y_vid = torch.cat((all_y_vid, torch.max(y).unsqueeze(0).cpu()))
+
+		# select class 1 probability for all frames and flatten
+		probs_class1 = probs[:, :, 1].reshape(-1).cpu()  # shape: (B*T,)
+
+		if batch_i == 0:
+			all_probs_vid2 = probs_class1.unsqueeze(0)   # (1, B*T)
+			all_pred = pred_labels.cpu()                 # (B*T,)
+			all_y = y_flat.cpu()                          # (B*T,)
+			all_y_vid = y_flat.max().unsqueeze(0).cpu()  # single value per video
+		else:
+			all_probs_vid2 = torch.cat((all_probs_vid2, probs_class1.unsqueeze(0)), dim=0)
+			all_pred = torch.cat((all_pred, pred_labels.cpu()), dim=0)
+			all_y = torch.cat((all_y, y_flat.cpu()), dim=0)
+			all_y_vid = torch.cat((all_y_vid, y_flat.max().unsqueeze(0).cpu()), dim=0)
 
 		# Empty cache
 		if torch.cuda.is_available():
@@ -298,6 +324,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
