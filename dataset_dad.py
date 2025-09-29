@@ -216,8 +216,8 @@ class Dataset(Dataset):
         #         video_frames = video_frames.unsqueeze(-1)  # (T, H, W, 1)
 
         # Usage
-        print("feature_path", feature_path.split('/')[-1].split(".")[0][5:])
-        print("att_file: ", att_file)
+        # print("feature_path", feature_path.split('/')[-1].split(".")[0][5:])
+        # print("att_file: ", att_file)
         all_att_feat = self.read_attention_video_grayscale(att_file)
         # print(all_att_feat.shape)  # (T, H, W)
 
@@ -333,6 +333,7 @@ class Dataset(Dataset):
     def __len__(self):
         return len(self.feature_paths)
     
+
 
 
 
