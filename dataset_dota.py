@@ -196,10 +196,10 @@ class CrossValDataset(Dataset):
         # Attention
         if curr_vid_label > 0:
             att_file = os.path.join(self.attention_path, "positive",
-                                    feature_path.split('/')[-1].split(".")[0] + '.avi')    # mp4
+                                    feature_path.split('/')[-1].split(".")[0] + '.mp4')    # mp4 # avi
         else:
             att_file = os.path.join(self.attention_path, "negative",
-                                    feature_path.split('/')[-1].split(".")[0] + '.avi')   # mp4
+                                    feature_path.split('/')[-1].split(".")[0] + '.mp4')   # mp4 # avi
 
         logging.info("------------------------att_file--------------------------------")
         logging.info(att_file)
