@@ -22,7 +22,7 @@ import cv2
 import numpy as np
 
 import logging
-Configure logging
+# Configure logging
 logging.basicConfig(level=logging.INFO)  # Set log level
 
     
