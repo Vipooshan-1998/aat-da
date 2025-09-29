@@ -199,7 +199,7 @@ class CrossValDataset(Dataset):
                                     feature_path.split('/')[-1].split(".")[0] + '.avi')    # mp4
         else:
             att_file = os.path.join(self.attention_path, "negative",
-                                    feature_path.split('/')[-1].split(".")[0] + '-neg.avi')   # mp4
+                                    feature_path.split('/')[-1].split(".")[0] + '.avi')   # mp4
 
         logging.info("------------------------att_file--------------------------------")
         logging.info(att_file)
