@@ -136,15 +136,14 @@ def test_model(epoch, model, test_dataloader):
 		# 	all_y_vid = torch.cat((all_y_vid, y_flat.max().unsqueeze(0).cpu()), dim=0)
 
 		if batch_i == 0: 
-			# store per-frame accident probability (class 1 only)
-			all_probs_vid2 = probs[:, 1].detach().cpu().numpy()[None, :]   # (1, T)
-			all_pred = probs.argmax(-1).detach().cpu().numpy().reshape(1, -1)  # (1, T)
-			all_y = y.detach().cpu().numpy().reshape(1,)                    # (1,)
-			all_y_vid = np.array([torch.max(y).item()])                     # (1,)
+			all_probs_vid2 = probs[:, :, 1].detach().cpu().numpy()     # (B, T)
+			all_pred = probs.argmax(-1).detach().cpu().numpy()         # (B, T)
+			all_y = y.detach().cpu().numpy()                           # (B, T)
+			all_y_vid = np.array([torch.max(y).item()])                # (1,)
 		else: 
-			all_probs_vid2 = np.vstack((all_probs_vid2, probs[:, 1].detach().cpu().numpy()[None, :]))
-			all_pred = np.vstack((all_pred, probs.argmax(-1).detach().cpu().numpy().reshape(1, -1)))
-			all_y = np.concatenate((all_y, y.detach().cpu().numpy().reshape(1,)))
+			all_probs_vid2 = np.vstack((all_probs_vid2, probs[:, :, 1].detach().cpu().numpy()))
+			all_pred = np.vstack((all_pred, probs.argmax(-1).detach().cpu().numpy()))
+			all_y = np.vstack((all_y, y.detach().cpu().numpy()))
 			all_y_vid = np.concatenate((all_y_vid, [torch.max(y).item()]))
 
 		# Empty cache
@@ -349,6 +348,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
