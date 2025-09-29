@@ -184,8 +184,10 @@ def test_model(epoch, model, test_dataloader, fold):
 def train(train_dataloader, test_dataloader, fold):
 
     # Define network
-    model = SpaceTempGoG_detr_dota(input_dim=opt.input_dim, embedding_dim=opt.embedding_dim,
-                                  img_feat_dim=opt.img_feat_dim, num_classes=opt.num_classes).to(device)
+    # model = SpaceTempGoG_detr_dota(input_dim=opt.input_dim, embedding_dim=opt.embedding_dim,
+    #                               img_feat_dim=opt.img_feat_dim, num_classes=opt.num_classes).to(device)
+  
+    model = AAT_DA_FullSeq(in_dim=opt.input_dim, d_model=opt.embedding_dim, num_heads=8, max_objects=19, spatial_layers=4, temporal_layers=2, dropout_spatial=0.3, dropout_temporal=0.1, fc_dropout=0.5).to(device)
     print(model)
 
     model.train()
