@@ -55,6 +55,7 @@ random.seed(0)
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset_path", type=str, default="data/dota/obj_feat", help="Path to extracted objects data")
 parser.add_argument("--img_dataset_path", type=str, default="data/dota/i3d_feat", help="Path to I3D feature data")
+parser.add_argument("--attention_path", type=str, default="", help="Path to attention video data")
 parser.add_argument("--toas_files_path", type=str, default="data/dota/toas", help="Path to frame of accidents feature data")
 parser.add_argument("--obj_mapping_file", type=str, default="data/dota/obj_idx_to_labels.json",
                     help="path to object label mapping file")
@@ -99,9 +100,12 @@ def test_model(epoch, model, test_dataloader, fold):
     model.eval()
     total_correct, total, all_toa = 0, 0, []
 
+    # for batch_i, (
+    # X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec,
+    # toa) in enumerate(test_dataloader):
     for batch_i, (
-    X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec,
-    toa) in enumerate(test_dataloader):
+    X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, 
+    toa, all_att_feat, obj_boxes, obj_feat) in enumerate(test_dataloader):
 
         X = X.reshape(-1, X.shape[2])
         img_feat = img_feat.reshape(-1, img_feat.shape[2])
@@ -123,8 +127,12 @@ def test_model(epoch, model, test_dataloader, fold):
         all_toa += [toa.item()]
 
         with torch.no_grad():
-            logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list,
-                                  temporal_edge_w, batch_vec)
+            # logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list,
+            #                       temporal_edge_w, batch_vec)
+            logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
+
+        logits = logits.squeeze(0)
+        probs = probs.squeeze(0)
 
         pred_labels = probs.argmax(1)
 
@@ -200,9 +208,10 @@ def train(train_dataloader, test_dataloader, fold):
 
         loss, all_toa = 0, []
 
-        for batch_i, (
-        X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec,
-        toa) in enumerate(train_dataloader):
+        # for batch_i, (
+        # X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec,
+        # toa) in enumerate(train_dataloader):
+        for batch_i, (X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec, toa, all_att_feat, obj_boxes, obj_feat) in enumerate(train_dataloader):   
 
             # Processing the inputs from the dataloader
             X = X.reshape(-1, X.shape[2])
@@ -226,9 +235,13 @@ def train(train_dataloader, test_dataloader, fold):
                 device), temporal_edge_w.to(device), edge_embeddings.to(device), batch_vec.to(device)
 
             # Get predictions from the model
-            logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list,
-                                  temporal_edge_w, batch_vec)
+            # logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list,
+            #                       temporal_edge_w, batch_vec)
+            logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
+            logits = logits.squeeze(0)
+            probs = probs.squeeze(0)
+            
             # Exclude the actual accident frames from the training
             c_loss1 = cls_criterion(logits[:toa], y[:toa])
             loss = loss + c_loss1
@@ -297,6 +310,7 @@ if __name__ == "__main__":
         training=True,
         ego_dist=opt.ego_dist,
         n_frames=opt.n_frames,
+        attention_path=opt.attention_path,
     )
 
     folds = opt.n_folds
