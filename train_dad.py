@@ -239,6 +239,9 @@ def main():
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
 			logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
+			print("train logits.shape: ", logits.shape)
+			print("train probs.shape:", probs.shape)
+
 			# Flatten logits and target for CrossEntropyLoss
 			B, T, C = logits.shape
 			logits_flat = logits.view(B*T, C)        # (B*T, 2)
@@ -315,6 +318,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
