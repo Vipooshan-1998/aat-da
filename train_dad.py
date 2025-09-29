@@ -125,29 +125,18 @@ def test_model(epoch, model, test_dataloader):
 		# 	all_y_vid = torch.cat((all_y_vid, torch.max(y).unsqueeze(0).cpu()))
 
 		# select class 1 probability for all frames and flatten
-		probs_class1 = probs[:, :, 1].reshape(-1).cpu()  # shape: (B*T,)
+		# probs_class1 = probs[:, :, 1].reshape(-1).cpu()  # shape: (B*T,)
 
-		# if batch_i == 0:
-		# 	all_probs_vid2 = probs_class1.unsqueeze(0)   # (1, B*T)
-		# 	all_pred = pred_labels.cpu()                 # (B*T,)
-		# 	all_y = y_flat.cpu()                          # (B*T,)
-		# 	all_y_vid = y_flat.max().unsqueeze(0).cpu()  # single value per video
-		# else:
-		# 	all_probs_vid2 = torch.cat((all_probs_vid2, probs_class1.unsqueeze(0)), dim=0)
-		# 	all_pred = torch.cat((all_pred, pred_labels.cpu()), dim=0)
-		# 	all_y = torch.cat((all_y, y_flat.cpu()), dim=0)
-		# 	all_y_vid = torch.cat((all_y_vid, y_flat.max().unsqueeze(0).cpu()), dim=0)
+		probs_video = probs[0, :, 1].detach().cpu().numpy()  # (T,)
+		y_video = torch.max(y).item()                       # scalar (video label)
 
-		if batch_i == 0: 
-			all_probs_vid2 = probs[:, :, 1].detach().cpu().numpy()     # (B, T)
-			all_pred = probs.argmax(-1).detach().cpu().numpy()         # (B, T)
-			all_y = y.detach().cpu().numpy()                           # (B, T)
-			all_y_vid = np.array([torch.max(y).item()])                # (1,)
-		else: 
-			all_probs_vid2 = np.vstack((all_probs_vid2, probs[:, :, 1].detach().cpu().numpy()))
-			all_pred = np.vstack((all_pred, probs.argmax(-1).detach().cpu().numpy()))
-			all_y = np.vstack((all_y, y.detach().cpu().numpy()))
-			all_y_vid = np.concatenate((all_y_vid, [torch.max(y).item()]))
+		if batch_i == 0:
+			all_probs_vid2 = probs_video[None, :]  # (1, T)
+			all_y_vid = np.array([y_video])        # (1,)
+		else:
+			all_probs_vid2 = np.vstack((all_probs_vid2, probs_video[None, :]))
+			all_y_vid = np.concatenate((all_y_vid, [y_video]))
+
 
 		# Empty cache
 		if torch.cuda.is_available():
@@ -351,6 +340,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
