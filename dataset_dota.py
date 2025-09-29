@@ -106,6 +106,8 @@ class CrossValDataset(Dataset):
             Returns:
                 np.ndarray: Video frames, shape (T, H, W)
             """
+            logging.info("------------------------att_file--------------------------------")
+            logging.info(att_file)
             cap = cv2.VideoCapture(att_file)
             frames = []
 		
