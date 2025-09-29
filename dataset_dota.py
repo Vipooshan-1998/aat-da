@@ -17,6 +17,10 @@ from torch_geometric.data import InMemoryDataset
 from nltk.tokenize import sent_tokenize, word_tokenize
 import spacy
 
+import torchvision.io as io
+import cv2
+import numpy as np
+
 # import logging
 # Configure logging
 # logging.basicConfig(level=logging.INFO)  # Set log level
