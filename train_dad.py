@@ -97,8 +97,8 @@ def test_model(epoch, model, test_dataloader):
 		logits = logits.squeeze(0)
 		probs = probs.squeeze(0)
 
-		print("test logits.shape: ", logits.shape)
-		print("test probs.shape:", probs.shape)
+		# print("test logits.shape: ", logits.shape)
+		# print("test probs.shape:", probs.shape)
 
 		pred_labels = probs.argmax(1)
 		
@@ -245,8 +245,8 @@ def main():
 			logits = logits.squeeze(0)
 			probs = probs.squeeze(0)
 
-			print("train logits.shape: ", logits.shape)
-			print("train probs.shape:", probs.shape)
+			# print("train logits.shape: ", logits.shape)
+			# print("train probs.shape:", probs.shape)
 
 			# Exclude the actual accident frames from the training
 			c_loss1 = cls_criterion(logits[:toa], y[:toa])    
@@ -301,6 +301,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
