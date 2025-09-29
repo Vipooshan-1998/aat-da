@@ -242,19 +242,14 @@ def main():
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
 			logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
+			logits = logits.squeeze(0)
+			probs = probs.squeeze(0)
+
 			print("train logits.shape: ", logits.shape)
 			print("train probs.shape:", probs.shape)
 
-			# Flatten logits and target for CrossEntropyLoss
-			B, T, C = logits.shape
-			logits_flat = logits.view(B*T, C)        # (B*T, 2)
-			y_flat = y.view(B*T)                     # (B*T,)
-
-			# Compute loss
-			c_loss1 = cls_criterion(logits_flat[:toa], y_flat[:toa])
-
-			# # Exclude the actual accident frames from the training
-			# c_loss1 = cls_criterion(logits[:toa], y[:toa])    
+			# Exclude the actual accident frames from the training
+			c_loss1 = cls_criterion(logits[:toa], y[:toa])    
 			loss = loss + c_loss1  
 
 			if (batch_i+1)%3 == 0:
@@ -263,33 +258,19 @@ def main():
 				optimizer.step()
 				loss = 0
 			
-			# pred_labels = probs.argmax(1)
-			# total_pred = (pred_labels == y).cpu().numpy().sum()
-
-			# logits: (B, T, 2)
-			pred_labels = probs.argmax(-1)       # (B, T)
-			pred_labels = pred_labels.view(-1)   # (B*T,) -> matches y_flat
-			y_flat = y.view(-1)                  # ensure same shape
-			total_pred = (pred_labels == y_flat).cpu().numpy().sum()
+			pred_labels = probs.argmax(1)
+			total_pred = (pred_labels == y).cpu().numpy().sum()
 	        
 			# Keep track of epoch metrics
 			epoch_metrics["c1_loss"].append(c_loss1.item())
 	
-			# if batch_i == 0: 
-			# 	all_probs_vid2 = probs[:, 1].detach().cpu().unsqueeze(0)
-			# 	all_y_vid =  torch.max(y).unsqueeze(0).cpu() #y.cpu() #.unsqueeze(0)
-			# else: 
-			# 	all_probs_vid2 = torch.cat((all_probs_vid2, probs[:, 1].detach().cpu().unsqueeze(0)))
-			# 	all_y_vid = torch.cat((all_y_vid, torch.max(y).unsqueeze(0).cpu()))
-			# all_toa += [toa]      
-
-			if batch_i == 0:
-				all_probs_vid2 = probs[:, 1].detach().cpu().numpy()[None, :]      # shape (1, T)
-				all_y_vid = np.array([torch.max(y).item()])                       # shape (1,)
-			else:
-				all_probs_vid2 = np.vstack((all_probs_vid2, probs[:, 1].detach().cpu().numpy()[None, :]))
-				all_y_vid = np.concatenate((all_y_vid, [torch.max(y).item()]))
-			all_toa += [toa]
+			if batch_i == 0: 
+				all_probs_vid2 = probs[:, 1].detach().cpu().unsqueeze(0)
+				all_y_vid =  torch.max(y).unsqueeze(0).cpu() #y.cpu() #.unsqueeze(0)
+			else: 
+				all_probs_vid2 = torch.cat((all_probs_vid2, probs[:, 1].detach().cpu().unsqueeze(0)))
+				all_y_vid = torch.cat((all_y_vid, torch.max(y).unsqueeze(0).cpu()))
+			all_toa += [toa]           
             
 			if batch_i % 100 == 0:
 				print ("[Epoch %d/%d] [Batch %d/%d] [CE Loss: %f (%f)] [LR : %.6f]"
@@ -311,8 +292,7 @@ def main():
 		print(f"Time: {end-start}")
 
 		#Print the avergae precision 
-		# _, ttc, _ = evaluation(all_probs_vid2.numpy(), all_y_vid.numpy(), all_toa)
-		_, ttc, _ = evaluation(all_probs_vid2, all_y_vid, all_toa)
+		_, ttc, _ = evaluation(all_probs_vid2.numpy(), all_y_vid.numpy(), all_toa)
     	
     	#Testing the model
 		test_model(epoch, model, test_dataloader)
