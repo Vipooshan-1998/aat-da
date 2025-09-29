@@ -103,52 +103,34 @@ def test_model(epoch, model, test_dataloader):
 		y_flat = y.view(-1)                  # ensure same shape
 		total_pred = (pred_labels == y_flat).cpu().numpy().sum()
 	
-		# pred_labels = probs.argmax(1)
-		
-		# total_correct += (pred_labels == y).cpu().numpy().sum()
-		# total += y.shape[0]
-
+		# Frame-level accumulation
 		pred_labels = probs.argmax(-1).view(-1)  # (B*T,)
 		y_flat = y.view(-1)                      # (B*T,)
-		total_correct += (pred_labels == y_flat).cpu().numpy().sum()
-		total += y_flat.shape[0]
-		
-		# if batch_i == 0: 
-		# 	all_probs_vid2 = probs[:, 1].cpu().unsqueeze(0)
-		# 	all_pred = pred_labels.cpu()
-		# 	all_y =  y.cpu() #.unsqueeze(0)
-		# 	all_y_vid =  torch.max(y).unsqueeze(0).cpu() #y.cpu() #.unsqueeze(0)
-		# else: 
-		# 	all_probs_vid2 = torch.cat((all_probs_vid2, probs[:, 1].cpu().unsqueeze(0)))
-		# 	all_pred = torch.cat((all_pred, pred_labels.cpu()))
-		# 	all_y = torch.cat((all_y, y.cpu()))
-		# 	all_y_vid = torch.cat((all_y_vid, torch.max(y).unsqueeze(0).cpu()))
-
-		# select class 1 probability for all frames and flatten
-		# probs_class1 = probs[:, :, 1].reshape(-1).cpu()  # shape: (B*T,)
-
-		probs_video = probs[0, :, 1].detach().cpu().numpy()  # (T,)
-		y_video = torch.max(y).item()                       # scalar (video label)
 
 		if batch_i == 0:
-			all_probs_vid2 = probs_video[None, :]  # (1, T)
-			all_y_vid = np.array([y_video])        # (1,)
+			all_pred = pred_labels.cpu().numpy()
+			all_y_frame = y_flat.cpu().numpy()
 		else:
-			all_probs_vid2 = np.vstack((all_probs_vid2, probs_video[None, :]))
-			all_y_vid = np.concatenate((all_y_vid, [y_video]))
-
+			all_pred = np.concatenate((all_pred, pred_labels.cpu().numpy()))
+			all_y_frame = np.concatenate((all_y_frame, y_flat.cpu().numpy()))
 
 		# Empty cache
 		if torch.cuda.is_available():
 			torch.cuda.empty_cache()
 
 	#Print the avergae precision 
-	np.savez('results_vid2.npz', probs=all_probs_vid2.numpy(), labels=all_y_vid.numpy(), toa=all_toa)
-	avg_prec, curr_ttc, _ = evaluation(all_probs_vid2.numpy(), all_y_vid.numpy(), all_toa)    
+	# np.savez('results_vid2.npz', probs=all_probs_vid2, labels=all_y_vid, toa=all_toa)
+	# avg_prec, curr_ttc, _ = evaluation(all_probs_vid2, all_y_vid, all_toa) 
+	np.savez('results_vid2.npz', probs=all_probs_vid2, labels=all_y_vid, toa=all_toa)
+	avg_prec, curr_ttc, _ = evaluation(all_probs_vid2, all_y_vid, all_toa)   
 	avg_prec = 100 * avg_prec
 
-	#Print the confusion matrix 
-	cf = confusion_matrix(all_y.numpy(), all_pred.numpy())
+	# #Print the confusion matrix 
+	# cf = confusion_matrix(all_y, all_pred)
+	# print(cf)
+
+	#Print the confusion matrix (frame-level)
+	cf = confusion_matrix(all_y_frame, all_pred)
 	print(cf)
 
 	#class-wise accuracy 
@@ -340,6 +322,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
