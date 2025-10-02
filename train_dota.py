@@ -49,6 +49,7 @@ torch.manual_seed(0)  # 3407
 parser = argparse.ArgumentParser()
 parser.add_argument("--dataset_path", type=str, default="data/dota/obj_feat", help="Path to extracted objects data")
 parser.add_argument("--img_dataset_path", type=str, default="data/dota/i3d_feat", help="Path to I3D feature data")
+parser.add_argument("--attention_path", type=str, default="", help="Path to attention video data")
 parser.add_argument("--obj_mapping_file", type=str, default="data/dota/obj_idx_to_labels.json",
                     help="path to object label mapping file")
 parser.add_argument("--split_path", type=str, default="splits_dota/", help="Path to train/test split")
@@ -93,9 +94,9 @@ def test_model(epoch, model, test_dataloader):
 
     for batch_i, (
     X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec,
-    toa, file_name) in enumerate(test_dataloader):
+    toa, all_att_feat, obj_boxes, obj_feat) in enumerate(test_dataloader):
         # print("file_name in order: ", file_name)
-        print(file_name[0])
+        # print(file_name[0])
         X = X.reshape(-1, X.shape[2])
         img_feat = img_feat.reshape(-1, img_feat.shape[2])
         edge_index = edge_index.reshape(-1, edge_index.shape[2])
@@ -115,9 +116,18 @@ def test_model(epoch, model, test_dataloader):
             device), temporal_edge_w.to(device), edge_embeddings.to(device), batch_vec.to(device)
         all_toa += [toa.item()]
 
+        img_feat = img_feat.unsqueeze(0)        # (1, T, D)
+        obj_boxes = obj_boxes[:, :, :, :4]
+        all_att_feat = all_att_feat.float()
+
         with torch.no_grad():
-            logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list,
-                                  temporal_edge_w, batch_vec)
+            # logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list,
+            #                       temporal_edge_w, batch_vec)
+
+            logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
+
+        logits = logits.squeeze(0)
+        probs = probs.squeeze(0)
 
         pred_labels = probs.argmax(1)
 
@@ -236,7 +246,7 @@ def main():
 
         for batch_i, (
         X, edge_index, y_true, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, batch_vec,
-        toa) in enumerate(train_dataloader):
+        toa, all_att_feat, obj_boxes, obj_feat) in enumerate(train_dataloader):
 
             # Processing the inputs from the dataloader
             X = X.reshape(-1, X.shape[2])
@@ -260,8 +270,50 @@ def main():
                 device), temporal_edge_w.to(device), edge_embeddings.to(device), batch_vec.to(device)
 
             # Get predictions from the model
-            logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list,
-                                  temporal_edge_w, batch_vec)
+            img_feat = img_feat.unsqueeze(0)        # (1, T, D)
+            obj_boxes = obj_boxes[:, :, :, :4]
+            all_att_feat = all_att_feat.float()
+
+            # Get predictions from the model
+            # logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list,
+            #                       temporal_edge_w, batch_vec)
+
+            logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
+
+            # ----------------------
+            # Run FLOP analysis
+            # ----------------------
+            inputs = (X, edge_index, img_feat, video_adj_list, edge_embeddings, 
+                      temporal_adj_list, temporal_edge_w, batch_vec)          # match forward signature
+            # flop_counter = FlopCounterMode(mods=model, display=False, depth=None)
+            # only measure FLOPs for the first batch
+            if batch_i == 0:
+                with torch.no_grad():
+                    with FlopTensorDispatchMode(model) as ftdm:
+                        out = model(X, edge_index, img_feat, video_adj_list,
+                                    edge_embeddings, temporal_adj_list,
+                                    temporal_edge_w, batch_vec)
+                        if isinstance(out, (tuple, list)):
+                            out = out[0]
+                            _ = out.mean()
+                        flops_forward = copy.deepcopy(ftdm.flop_counts)
+            
+                # flatten + sum
+                total_flops = 0
+                stack = [flops_forward]
+                while stack:
+                    current = stack.pop()
+                    for v in current.values():
+                        if isinstance(v, (dict, defaultdict)):
+                            stack.append(v)
+                        else:
+                            total_flops += v
+            
+                print("Inference FLOPs (first batch):", total_flops)
+            # ---------------- End of Flops Calculation ---------------------
+              
+            logits = logits.squeeze(0)
+            probs = probs.squeeze(0)
 
             # Exclude the actual accident frames from the training
             c_loss1 = cls_criterion(logits[:toa], y[:toa])
