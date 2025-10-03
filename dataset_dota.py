@@ -122,7 +122,7 @@ class Dataset(Dataset):
             """
             # logging.info("------------------------att_file--------------------------------")
             # logging.info(att_file)
-            video_path = get_video_path(att_file)
+            video_path = self.get_video_path(att_file)
             cap = cv2.VideoCapture(video_path)
             frames = []
 		
