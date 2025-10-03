@@ -203,7 +203,7 @@ def main():
         training=True,
         attention_path=opt.attention_path,
     )
-    train_dataloader = DataLoader(train_dataset, batch_size=opt.video_batch_size, shuffle=True, num_workers=8)
+    train_dataloader = DataLoader(train_dataset, batch_size=opt.video_batch_size, shuffle=True, num_workers=0)
 
     # Define test set
     test_dataset = Dataset(
@@ -216,7 +216,7 @@ def main():
         training=False,
         attention_path=opt.attention_path,
     )
-    test_dataloader = DataLoader(test_dataset, batch_size=opt.test_video_batch_size, shuffle=False, num_workers=8)
+    test_dataloader = DataLoader(test_dataset, batch_size=opt.test_video_batch_size, shuffle=False, num_workers=0)
 
     # Define network
     model =AAT_DA_FullSeq(in_dim=opt.input_dim, d_model=opt.embedding_dim, num_heads=8, max_objects=19, spatial_layers=4, 
