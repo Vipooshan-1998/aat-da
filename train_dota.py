@@ -219,8 +219,8 @@ def main():
     test_dataloader = DataLoader(test_dataset, batch_size=opt.test_video_batch_size, shuffle=False, num_workers=8)
 
     # Define network
-    model = AAT_DA_FullSeq(input_dim=opt.input_dim, embedding_dim=opt.embedding_dim,
-                                  img_feat_dim=opt.img_feat_dim, num_classes=opt.num_classes).to(device)
+    model =AAT_DA_FullSeq(in_dim=opt.input_dim, d_model=opt.embedding_dim, num_heads=8, max_objects=19, spatial_layers=4, 
+                          temporal_layers=2, dropout_spatial=0.3, dropout_temporal=0.1, fc_dropout=0.5).to(device)
     print(model)
 
     model.train()
