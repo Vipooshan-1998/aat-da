@@ -201,6 +201,7 @@ def main():
         ref_interval=opt.ref_interval,
         objmap_file=opt.obj_mapping_file,
         training=True,
+        attention_path=opt.attention_path,
     )
     train_dataloader = DataLoader(train_dataset, batch_size=opt.video_batch_size, shuffle=True, num_workers=8)
 
@@ -213,6 +214,7 @@ def main():
         ref_interval=opt.ref_interval,
         objmap_file=opt.obj_mapping_file,
         training=False,
+        attention_path=opt.attention_path,
     )
     test_dataloader = DataLoader(test_dataset, batch_size=opt.test_video_batch_size, shuffle=False, num_workers=8)
 
