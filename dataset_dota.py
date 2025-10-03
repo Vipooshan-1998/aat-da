@@ -102,6 +102,14 @@ class Dataset(Dataset):
         """
         return int(feat_path.split('/')[-1].split('.mat')[0].split('_')[-1])
 
+    def get_video_path(att_file):
+	    # Try both extensions in order
+	    for ext in [".avi", ".mp4"]:
+	        candidate = att_file + ext
+	        if os.path.isfile(candidate):
+	            return candidate
+	    raise FileNotFoundError(f"Video not found for {att_file} with .avi or .mp4")
+
     def read_attention_video_grayscale(self, att_file):
             """
             Read a grayscale attention video and return frames as a NumPy array of shape (T, H, W)
@@ -114,7 +122,8 @@ class Dataset(Dataset):
             """
             # logging.info("------------------------att_file--------------------------------")
             # logging.info(att_file)
-            cap = cv2.VideoCapture(att_file)
+            video_path = get_video_path(att_file)
+            cap = cv2.VideoCapture(video_path)
             frames = []
 		
             while True:
@@ -210,10 +219,10 @@ class Dataset(Dataset):
         # Attention
         if curr_vid_label > 0:
             att_file = os.path.join(self.attention_path, "positive",
-                                    feature_path.split('/')[-1].split(".")[0] + '.mp4')    # mp4 # avi
+                                    feature_path.split('/')[-1].split(".")[0])    # mp4 # avi
         else:
             att_file = os.path.join(self.attention_path, "negative",
-                                    feature_path.split('/')[-1].split(".")[0] + '.mp4')   # mp4 # avi
+                                    feature_path.split('/')[-1].split(".")[0])   # mp4 # avi
 			
         print("att_file: ", att_file)
         all_att_feat = self.read_attention_video_grayscale(att_file)
@@ -429,8 +438,8 @@ class CrossValDataset(Dataset):
             Returns:
                 np.ndarray: Video frames, shape (T, H, W)
             """
-            logging.info("------------------------att_file--------------------------------")
-            logging.info(att_file)
+            # logging.info("------------------------att_file--------------------------------")
+            # logging.info(att_file)
             cap = cv2.VideoCapture(att_file)
             frames = []
 		
