@@ -21,9 +21,9 @@ import torchvision.io as io
 import cv2
 import numpy as np
 
-import logging
-# Configure logging
-logging.basicConfig(level=logging.INFO)  # Set log level
+# import logging
+# # Configure logging
+# logging.basicConfig(level=logging.INFO)  # Set log level
 
 
 class Dataset(Dataset):
@@ -112,8 +112,8 @@ class Dataset(Dataset):
             Returns:
                 np.ndarray: Video frames, shape (T, H, W)
             """
-            logging.info("------------------------att_file--------------------------------")
-            logging.info(att_file)
+            # logging.info("------------------------att_file--------------------------------")
+            # logging.info(att_file)
             cap = cv2.VideoCapture(att_file)
             frames = []
 		
