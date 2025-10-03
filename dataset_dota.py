@@ -352,7 +352,7 @@ class Dataset(Dataset):
                 video_adj_list += [[i - j, i]]  # adding previous ref_interval neighbors
         video_adj_list = torch.Tensor(video_adj_list).permute((1, 0)).long()
 
-        return data.x, data.edge_index, data.y, all_img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, num_objs_list, curr_toa, file_name, all_att_feat, all_bbox, all_feat
+        return data.x, data.edge_index, data.y, all_img_feat, video_adj_list, edge_embeddings, temporal_adj_list, obj_vis_feat, num_objs_list, curr_toa, all_att_feat, all_bbox, all_feat
 
     def __len__(self):
         return len(self.feature_paths)
