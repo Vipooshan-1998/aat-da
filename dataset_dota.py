@@ -102,7 +102,7 @@ class Dataset(Dataset):
         """
         return int(feat_path.split('/')[-1].split('.mat')[0].split('_')[-1])
 
-    def get_video_path(att_file):
+    def get_video_path(self, att_file):
 	    # Try both extensions in order
 	    for ext in [".avi", ".mp4"]:
 	        candidate = att_file + ext
