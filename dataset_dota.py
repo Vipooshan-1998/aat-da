@@ -228,7 +228,7 @@ class Dataset(Dataset):
             att_file = os.path.join(self.attention_path, "negative",
                                     feature_path.split('/')[-1].split(".")[0])   # mp4 # avi
 			
-        print("att_file: ", att_file)
+        # print("att_file: ", att_file)
         all_att_feat = self.read_attention_video_grayscale(att_file)
 
         # Calculating the bbox centers
