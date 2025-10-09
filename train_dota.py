@@ -44,7 +44,7 @@ from eval_utils import evaluation
 import time
 from eval_utils import evaluation
 
-from torchtnt.utils.flops import FlopTensorDispatchMode
+# from torchtnt.utils.flops import FlopTensorDispatchMode
 from collections import defaultdict
 import copy
 
