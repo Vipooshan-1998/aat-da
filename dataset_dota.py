@@ -206,10 +206,10 @@ class Dataset(Dataset):
 
         # Reading frame stats file
         if curr_vid_label > 0:
-            frame_stats_file = os.path.join(self.frame_stats_path, feature_path.split('/')[-2][:-3], "positive",
+            frame_stats_file = os.path.join(self.frame_stats_path, feature_path.split('/')[-2], "positive",
                                             feature_path.split('/')[-1].split(".")[0] + '.npy')
         else:
-            frame_stats_file = os.path.join(self.frame_stats_path, feature_path.split('/')[-2][:-3], "negative",
+            frame_stats_file = os.path.join(self.frame_stats_path, feature_path.split('/')[-2], "negative",
                                             feature_path.split('/')[-1].split(".")[0] + '.npy')
         # if curr_vid_label > 0:
         #     frame_stats_file = os.path.join(self.frame_stats_path, "positive",
@@ -222,10 +222,10 @@ class Dataset(Dataset):
 
         # Attention
         if curr_vid_label > 0:
-            att_file = os.path.join(self.attention_path,  feature_path.split('/')[-2], "positive",
+            att_file = os.path.join(self.attention_path,  feature_path.split('/')[-2][:-3], "positive",
                                     feature_path.split('/')[-1].split(".")[0] + ".mp4")    # mp4 # avi
         else:
-            att_file = os.path.join(self.attention_path,  feature_path.split('/')[-2], "negative",
+            att_file = os.path.join(self.attention_path,  feature_path.split('/')[-2][:-3], "negative",
                                     feature_path.split('/')[-1].split(".")[0] + ".mp4")   # mp4 # avi
 			
         # print("att_file: ", att_file)
