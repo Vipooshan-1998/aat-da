@@ -223,10 +223,10 @@ class Dataset(Dataset):
         # Attention
         if curr_vid_label > 0:
             att_file = os.path.join(self.attention_path,  feature_path.split('/')[-2], "positive",
-                                    feature_path.split('/')[-1].split(".")[0], ".mp4")    # mp4 # avi
+                                    feature_path.split('/')[-1].split(".")[0] + ".mp4")    # mp4 # avi
         else:
             att_file = os.path.join(self.attention_path,  feature_path.split('/')[-2], "negative",
-                                    feature_path.split('/')[-1].split(".")[0], ".mp4")   # mp4 # avi
+                                    feature_path.split('/')[-1].split(".")[0] + ".mp4")   # mp4 # avi
 			
         # print("att_file: ", att_file)
         all_att_feat = self.read_attention_video_grayscale(att_file)
