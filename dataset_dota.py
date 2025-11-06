@@ -189,10 +189,10 @@ class Dataset(Dataset):
         # print("file_name in dataloader: ", feature_path.split('/')[-1].split(".")[0])
         file_name = feature_path.split('/')[-1].split(".")[0]
         if curr_vid_label > 0:
-            img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "positive",
+            img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2][:-3], "positive",
                                     feature_path.split('/')[-1].split(".")[0] + '.npy')
         else:
-            img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2], "negative",
+            img_file = os.path.join(self.img_dataset_path, feature_path.split('/')[-2][:-3], "negative",
                                     feature_path.split('/')[-1].split(".")[0] + '.npy')
 
         # if curr_vid_label > 0:
