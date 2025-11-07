@@ -46,7 +46,7 @@ class Dataset(Dataset):
         self.dilation_factor = 1
         self.topk = 10
         self.frame_stats_path = os.path.join('/'.join(dataset_path.split("/")[:-1]), 'frames_stats')  # (height, width)
-        self.n_frames = 100
+        self.n_frames = 50
 
         # Obj label to word embeddings
         self.idx_to_classes_obj = json.load(open(objmap_file))
@@ -157,7 +157,7 @@ class Dataset(Dataset):
 
         curr_vid_label = int(all_data['labels'][1])
         if curr_vid_label > 0:
-            curr_toa = 90
+            curr_toa = self.n_frames
         else:
             curr_toa = self.n_frames + 1
 
@@ -333,6 +333,7 @@ class Dataset(Dataset):
     def __len__(self):
         return len(self.feature_paths)
     
+
 
 
 
