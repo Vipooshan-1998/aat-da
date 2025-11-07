@@ -110,6 +110,42 @@ class Dataset(Dataset):
 	            return candidate
 	    raise FileNotFoundError(f"Video not found for {att_file} with .avi or .mp4")
 
+    # def read_attention_video_grayscale(self, att_file):
+    #         """
+    #         Read a grayscale attention video and return frames as a NumPy array of shape (T, H, W)
+            
+    #         Args:
+    #             att_file (str): Path to the attention video (.mp4)
+		        
+    #         Returns:
+    #             np.ndarray: Video frames, shape (T, H, W)
+    #         """
+    #         # logging.info("------------------------att_file--------------------------------")
+    #         # logging.info(att_file)
+    #         video_path = self.get_video_path(att_file)
+    #         cap = cv2.VideoCapture(video_path)
+    #         frames = []
+		
+    #         while True:
+    #             ret, frame = cap.read()
+    #             if not ret:
+    #                 break
+		        
+    #             # Convert to grayscale if frame has 3 channels
+    #             if len(frame.shape) == 3:
+    #                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    #             # Resize to consistent target size
+    #             target_size=(720, 1280)
+    #             frame = cv2.resize(frame, (target_size[1], target_size[0]))  # cv2 takes (W, H)
+		
+    #             frames.append(frame)
+		
+    #         cap.release()
+		    
+    #         frames = np.stack(frames)  # shape: (T, H, W)
+    #         return frames
+
     def read_attention_video_grayscale(self, att_file):
             """
             Read a grayscale attention video and return frames as a NumPy array of shape (T, H, W)
@@ -120,10 +156,7 @@ class Dataset(Dataset):
             Returns:
                 np.ndarray: Video frames, shape (T, H, W)
             """
-            # logging.info("------------------------att_file--------------------------------")
-            # logging.info(att_file)
-            video_path = self.get_video_path(att_file)
-            cap = cv2.VideoCapture(video_path)
+            cap = cv2.VideoCapture(att_file)
             frames = []
 		
             while True:
@@ -134,10 +167,6 @@ class Dataset(Dataset):
                 # Convert to grayscale if frame has 3 channels
                 if len(frame.shape) == 3:
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-                # Resize to consistent target size
-                target_size=(720, 1280)
-                frame = cv2.resize(frame, (target_size[1], target_size[0]))  # cv2 takes (W, H)
 		
                 frames.append(frame)
 		
@@ -145,6 +174,7 @@ class Dataset(Dataset):
 		    
             frames = np.stack(frames)  # shape: (T, H, W)
             return frames
+
 
     def _get_distances(self, a, b, p):
         return torch.abs(((b[1] - a[1])*p[0] - (b[0] - a[0])*p[1] + b[0]*a[1] - b[1]*a[0]) / torch.sqrt(torch.pow(b[1] - a[1], 2) + torch.pow(b[0] - a[0], 2)))
