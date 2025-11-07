@@ -167,6 +167,10 @@ class Dataset(Dataset):
                 # Convert to grayscale if frame has 3 channels
                 if len(frame.shape) == 3:
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+                # Resize to consistent target size
+                target_size=(720, 1280)
+                frame = cv2.resize(frame, (target_size[1], target_size[0]))  # cv2 takes (W, H)
 		
                 frames.append(frame)
 		
