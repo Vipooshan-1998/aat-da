@@ -183,10 +183,10 @@ class Dataset(Dataset):
         # Reading frame stats file
         if curr_vid_label > 0:
             frame_stats_file = os.path.join(self.frame_stats_path, feature_path.split('/')[-2], "positive",
-                                            feature_path.split('/')[-1].split(".")[0][5:] + '.npy')
+                                            feature_path.split('/')[-1].split(".")[0] + '.npy')
         else:
             frame_stats_file = os.path.join(self.frame_stats_path, feature_path.split('/')[-2], "negative",
-                                            feature_path.split('/')[-1].split(".")[0][5:] + '.npy')    # '-neg.npy'
+                                            feature_path.split('/')[-1].split(".")[0] + '.npy')    # '-neg.npy'
         # Edit
         # if curr_vid_label > 0:
         #     frame_stats_file = os.path.join(self.frame_stats_path, feature_path.split('/')[-2], "positive",
@@ -333,6 +333,7 @@ class Dataset(Dataset):
     def __len__(self):
         return len(self.feature_paths)
     
+
 
 
 
