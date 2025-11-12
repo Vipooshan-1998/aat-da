@@ -22,6 +22,8 @@ import matplotlib.pyplot as plt
 import time
 from eval_utils import evaluation
 
+from thop import profile
+
 torch.manual_seed(0)   #3407
 
 parser = argparse.ArgumentParser()
@@ -242,6 +244,12 @@ def main():
 			# logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list, temporal_edge_w, batch_vec)
 			logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
+			# FLOPs calculation
+			inputs = (img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)      # match forward signature
+			flops, params = profile(model, inputs=inputs)
+			print(f"Total FLOPs: {flops}")           
+			print(f"Total Params: {params}") 
+
 			logits = logits.squeeze(0)
 			probs = probs.squeeze(0)
 
@@ -301,6 +309,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
