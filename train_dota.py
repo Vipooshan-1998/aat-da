@@ -284,7 +284,7 @@ def main():
             # logits, probs = model(X, edge_index, img_feat, video_adj_list, edge_embeddings, temporal_adj_list,
             #                       temporal_edge_w, batch_vec)
 
-            logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
+            # logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
             # ----------------------
             # Run FLOP analysis
