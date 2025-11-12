@@ -245,7 +245,7 @@ def main():
 			logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
 			# FLOPs calculation
-			inputs = (img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)      # match forward signature
+			inputs = (img_feat, obj_feat, obj_boxes, all_att_feat, None)      # match forward signature
 			flops, params = profile(model, inputs=inputs)
 			print(f"Total FLOPs: {flops}")           
 			print(f"Total Params: {params}") 
@@ -309,6 +309,7 @@ def main():
 	
 if __name__ == "__main__":
 	main()
+
 
 
 
