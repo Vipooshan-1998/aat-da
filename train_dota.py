@@ -44,7 +44,7 @@ from eval_utils import evaluation
 import time
 from eval_utils import evaluation
 
-# from torchtnt.utils.flops import FlopTensorDispatchMode
+from torchtnt.utils.flops import FlopTensorDispatchMode
 from collections import defaultdict
 import copy
 
@@ -286,34 +286,35 @@ def main():
 
             logits, probs, Ht = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
 
-            # # ----------------------
-            # # Run FLOP analysis
-            # # ----------------------
-            # # inputs = (X, edge_index, img_feat, video_adj_list, edge_embeddings, 
-            # #           temporal_adj_list, temporal_edge_w, batch_vec)          # match forward signature
-            # # flop_counter = FlopCounterMode(mods=model, display=False, depth=None)
-            # # only measure FLOPs for the first batch
-            # if batch_i == 0:
-            #     with torch.no_grad():
-            #         with FlopTensorDispatchMode(model) as ftdm:
-            #             out = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
-            #             if isinstance(out, (tuple, list)):
-            #                 out = out[0]
-            #                 _ = out.mean()
-            #             flops_forward = copy.deepcopy(ftdm.flop_counts)
+            # ----------------------
+            # Run FLOP analysis
+            # ----------------------
+            # inputs = (X, edge_index, img_feat, video_adj_list, edge_embeddings, 
+            #           temporal_adj_list, temporal_edge_w, batch_vec)          # match forward signature
+            # flop_counter = FlopCounterMode(mods=model, display=False, depth=None)
+            # only measure FLOPs for the first batch
+            if batch_i == 0:
+                with torch.no_grad():
+                    with FlopTensorDispatchMode(model) as ftdm:
+                        # out = model(img_feat, obj_feat, obj_boxes, driver_attn_map=all_att_feat, driver_attn_per_obj=None)
+                        out = model(img_feat, obj_feat, obj_boxes, all_att_feat, None)
+                        if isinstance(out, (tuple, list)):
+                            out = out[0]
+                            _ = out.mean()
+                        flops_forward = copy.deepcopy(ftdm.flop_counts)
             
-            #     # flatten + sum
-            #     total_flops = 0
-            #     stack = [flops_forward]
-            #     while stack:
-            #         current = stack.pop()
-            #         for v in current.values():
-            #             if isinstance(v, (dict, defaultdict)):
-            #                 stack.append(v)
-            #             else:
-            #                 total_flops += v
+                # flatten + sum
+                total_flops = 0
+                stack = [flops_forward]
+                while stack:
+                    current = stack.pop()
+                    for v in current.values():
+                        if isinstance(v, (dict, defaultdict)):
+                            stack.append(v)
+                        else:
+                            total_flops += v
             
-            #     print("Inference FLOPs (first batch):", total_flops)
+                print("Inference FLOPs (first batch):", total_flops)
             # # ---------------- End of Flops Calculation ---------------------
               
             logits = logits.squeeze(0)
